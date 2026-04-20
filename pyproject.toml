@@ -1,7 +1,7 @@
 [project]
 name = "pman"
 version = "0.1.1.dev1"
-description = "A cli tool for easier project managment 😎"
+description = "A cli tool for easier project management 😎"
 readme = "README.md"
 authors = [
     { name = "fburleson", email = "joelburleson0104@gmail.com" }
