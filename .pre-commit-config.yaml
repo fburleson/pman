@@ -1,0 +1,48 @@
+repos:
+  - repo: local
+    hooks:
+      - id: conventional-pre-commit
+        name: conventional-pre-commit
+        entry: uv run conventional-pre-commit
+        language: system
+        stages: [commit-msg]
+
+      - id: uv-lock
+        name: uv-lock
+        entry: uv lock --check
+        language: system
+        # files: ^(pyproject\.toml|uv\.lock)$
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: ruff
+        name: ruff
+        entry: uv run --frozen --no-sync ruff check --fix --force-exclude
+        language: system
+        types: [python]
+        require_serial: true
+        stages: [pre-commit]
+
+      - id: ruff-format
+        name: ruff-format
+        entry: uv run --frozen --no-sync ruff format --force-exclude
+        language: system
+        types_or: [python]
+        require_serial: true
+        stages: [pre-commit]
+
+      - id: pyright
+        name: pyright
+        entry: uv run pyright
+        language: system
+        types: [python]
+        pass_filenames: true
+        stages: [pre-commit]
+
+      - id: pytest
+        name: pytest
+        entry: uv run pytest tests
+        language: python
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
