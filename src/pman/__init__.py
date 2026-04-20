@@ -1,2 +1,1 @@
-def hello() -> str:
-    return "Hello from pman!"
+from .main import pman as pman

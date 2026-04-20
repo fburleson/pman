@@ -1,7 +1,7 @@
 [project]
 name = "pman"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.1.1.dev1"
+description = "A cli tool for easier project managment 😎"
 readme = "README.md"
 authors = [
     { name = "fburleson", email = "joelburleson0104@gmail.com" }
@@ -21,3 +21,7 @@ dev = [
     "pytest>=9.0.3",
     "ruff>=0.15.11",
 ]
+
+[project.scripts]
+pman = "pman.main:cli_entry"
+
