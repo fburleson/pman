@@ -2,15 +2,22 @@ from enum import StrEnum
 
 import click
 
-from pman._core.cmd import Command
+
+class EMOJIS:
+    PMAN: str = "😎"
+    SAD_FACE: str = "😞"
+    ROCKET: str = "🚀"
+    WORKING: str = "🛠️"
+    CHECK: str = "✅"
+    CROSS: str = "❌"
+    PACKAGE: str = "📦"
+    MEGAPHONE: str = "📣"
+    DRY_FACE: str = "😑"
+    MAN_STANDING: str = "🧍"
 
 
 class PyProject:
     CONFIG: str = "pyproject.toml"
-
-
-def run_cmd(cmd: Command, verbose: bool, dry: bool):
-    cmd.run_dry() if dry else cmd.run(verbose=verbose)
 
 
 def global_options(f):
@@ -18,10 +25,13 @@ def global_options(f):
         "--dry",
         default=False,
         is_flag=True,
-        help="Perform a dry run, only showing the commands, but not executing.",
+        help=f"Perform a dry run, only showing the commands, not executing. {EMOJIS.DRY_FACE}",
     )(f)
     f = click.option(
-        "--verbose", is_flag=True, default=False, help="Display verbose output."
+        "--verbose",
+        is_flag=True,
+        default=False,
+        help=f"Display verbose output. {EMOJIS.MEGAPHONE}",
     )(f)
     return f
 

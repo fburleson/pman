@@ -2,6 +2,11 @@ import subprocess
 from dataclasses import dataclass
 from typing import Iterable
 
+from rich import print
+from rich.status import Status
+
+from pman._cli.util import EMOJIS
+
 
 class Result(subprocess.CompletedProcess[str]):
     def _print_fmt(self, text: str) -> str:
@@ -9,6 +14,9 @@ class Result(subprocess.CompletedProcess[str]):
 
     def __str__(self) -> str:
         return self._print_fmt(self.stdout)
+
+    def __rich__(self) -> str:
+        return f"[dim]{self._print_fmt(self.stdout)}[/]"
 
     def __format__(self, format_spec):
         if format_spec == "stdout":
@@ -27,6 +35,9 @@ class AtomicCommand:
         def __str__(self) -> str:
             return f"{self._result:stderr}"
 
+        def __rich__(self) -> str:
+            return f"[dim bold red]{self._result:stderr}[/]"
+
         @property
         def result(self) -> Result:
             return self._result
@@ -37,6 +48,9 @@ class AtomicCommand:
 
     def __str__(self):
         return f">\t{'\t'.join(self._cmd)}"
+
+    def __rich__(self):
+        return f">\t[italic]{'\t'.join(self._cmd)}[/]"
 
     def run(self) -> Result:
         try:
@@ -65,34 +79,40 @@ class Command:
     def __str__(self) -> str:
         return self._name
 
+    def __rich__(self) -> str:
+        return f"[bold]{str(self)}[/]"
+
     def run(self, *, verbose: bool = False) -> tuple[Result, ...]:
         self._settings.verbose_output = verbose
         if self._settings.verbose_cmd:
             print(self)
         results: list[Result] = list()
         for i, atomic_cmd in enumerate(self.atomic_commands):
+            if self._settings.verbose_cmd:
+                print(atomic_cmd)
             try:
-                result: Result = atomic_cmd.run()
+                with Status("[bold green]Executing...[/]", spinner="dots"):
+                    result: Result = atomic_cmd.run()
             except AtomicCommand.AtomicCommandError as e:
                 results.append(e.result)
                 if not self._settings.verbose_cmd:
                     print(self)
-                print(atomic_cmd)
                 print(e)
+                print(f"[bold blink red]pman has failed[/] {EMOJIS.SAD_FACE}")
                 return tuple(results)
             results.append(result)
-            if self._settings.verbose_cmd:
-                print(atomic_cmd)
+            if self._settings.verbose_cmd and self._settings.verbose_output:
                 if self._settings.verbose_output:
                     if not str(result).isspace():
                         if i == len(self.atomic_commands) - 1:
                             print(result)
                         else:
                             print(result, end="\n\n")
+        print(f"[bold blink green]Success for pman[/] {EMOJIS.PMAN}")
         return tuple(results)
 
     def run_dry(self):
-        print(self, "(dry)")
+        print(self, f"(dry {EMOJIS.DRY_FACE})")
         for atomic_cmd in self.atomic_commands:
             print(atomic_cmd)
 
@@ -103,3 +123,7 @@ class Command:
     @property
     def atomic_commands(self) -> tuple[AtomicCommand, ...]:
         return self._cmds
+
+
+def run_cmd(cmd: Command, verbose: bool, dry: bool):
+    cmd.run_dry() if dry else cmd.run(verbose=verbose)

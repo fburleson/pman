@@ -2,8 +2,8 @@ import click
 
 from pman._cli.atomic.git import Git
 from pman._cli.atomic.uv import UV
-from pman._cli.util import BranchType, PyProject, global_options, run_cmd
-from pman._core.cmd import Command
+from pman._cli.util import EMOJIS, BranchType, PyProject, global_options
+from pman._core.cmd import Command, run_cmd
 
 
 @click.command()
@@ -12,7 +12,7 @@ from pman._core.cmd import Command
 @click.option(
     "--stay",
     is_flag=True,
-    help="Stay on the current branch.",
+    help=f"Stay on the current branch. {EMOJIS.MAN_STANDING}",
 )
 @global_options
 def add(branch_type: BranchType, name: str, stay: bool, verbose: bool, dry: bool):
@@ -32,7 +32,7 @@ def add(branch_type: BranchType, name: str, stay: bool, verbose: bool, dry: bool
     if verbose:
         cmds.append(Git.list_branches())
     cmd = Command(
-        f"create work branch {branch_name}",
+        f"{EMOJIS.WORKING}  create work branch {branch_name}",
         *cmds,
     )
     run_cmd(cmd, verbose, dry)
@@ -67,7 +67,7 @@ def finish(dest: str, remote: str, verbose: bool, dry: bool):
     if dest in remote_branches:
         cmds.insert(1, Git.pull())
     cmd = Command(
-        f"finish on branch {init_branch}",
+        f"{EMOJIS.PACKAGE} finish on branch {init_branch}",
         *cmds,
     )
     run_cmd(cmd, verbose, dry)
@@ -88,7 +88,7 @@ def finish(dest: str, remote: str, verbose: bool, dry: bool):
 )
 @global_options
 def release(dest: str, src: str, verbose: bool, dry: bool):
-    """Merge squash to release branch and bump version to release"""
+    """Merge squash to release branch and bump version to release."""
     cmds: list = [
         # UV.bump_version("dev", "patch"),
         Git.checkout(dest),
@@ -99,7 +99,7 @@ def release(dest: str, src: str, verbose: bool, dry: bool):
     if verbose:
         cmds.append(UV.version())
     cmd = Command(
-        f"release on branch {dest}",
+        f"{EMOJIS.ROCKET} release on branch {dest}",
         *cmds,
     )
     run_cmd(cmd, verbose, dry)
