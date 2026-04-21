@@ -82,7 +82,7 @@ class Command:
     def __rich__(self) -> str:
         return f"[bold]{str(self)}[/]"
 
-    def run(self, *, verbose: bool = False) -> tuple[Result, ...]:
+    def run(self, *, verbose: bool = True) -> tuple[Result, ...]:
         self._settings.verbose_output = verbose
         if self._settings.verbose_cmd:
             print(self)
@@ -91,7 +91,7 @@ class Command:
             if self._settings.verbose_cmd:
                 print(atomic_cmd)
             try:
-                with Status("[bold green]Executing...[/]", spinner="dots"):
+                with Status("[bold green][/]", spinner="dots"):
                     result: Result = atomic_cmd.run()
             except AtomicCommand.AtomicCommandError as e:
                 results.append(e.result)

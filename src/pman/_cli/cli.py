@@ -15,7 +15,7 @@ from pman._core.cmd import Command, run_cmd
     help=f"Stay on the current branch. {EMOJIS.MAN_STANDING}",
 )
 @global_options
-def add(branch_type: BranchType, name: str, stay: bool, verbose: bool, dry: bool):
+def add(branch_type: BranchType, name: str, stay: bool, silent: bool, dry: bool):
     """Add a work branch to your local git repo."""
     branch_type = BranchType(branch_type)
     branch_name: str = f"{branch_type}/{name}"
@@ -29,13 +29,13 @@ def add(branch_type: BranchType, name: str, stay: bool, verbose: bool, dry: bool
     ]
     if stay:
         cmds.append(Git.checkout(init_branch))
-    if verbose:
+    if not silent:
         cmds.append(Git.list_branches())
     cmd = Command(
         f"{EMOJIS.WORKING}  create work branch {branch_name}",
         *cmds,
     )
-    run_cmd(cmd, verbose, dry)
+    run_cmd(cmd, not silent, dry)
 
 
 @click.command()
@@ -52,7 +52,7 @@ def add(branch_type: BranchType, name: str, stay: bool, verbose: bool, dry: bool
     show_default=True,
 )
 @global_options
-def finish(dest: str, remote: str, verbose: bool, dry: bool):
+def finish(dest: str, remote: str, silent: bool, dry: bool):
     """Merge squash and delete branch."""
     init_branch: str = Git.current_branch().run().stdout.strip()
     remote_branches: list = Git.remote_branches().run().stdout.strip().split()
@@ -70,7 +70,7 @@ def finish(dest: str, remote: str, verbose: bool, dry: bool):
         f"{EMOJIS.PACKAGE} finish on branch {init_branch}",
         *cmds,
     )
-    run_cmd(cmd, verbose, dry)
+    run_cmd(cmd, not silent, dry)
 
 
 @click.command()
@@ -87,7 +87,7 @@ def finish(dest: str, remote: str, verbose: bool, dry: bool):
     show_default=True,
 )
 @global_options
-def release(dest: str, src: str, verbose: bool, dry: bool):
+def release(dest: str, src: str, silent: bool, dry: bool):
     """Merge squash to release branch and bump version to release."""
     cmds: list = [
         # UV.bump_version("dev", "patch"),
@@ -96,10 +96,10 @@ def release(dest: str, src: str, verbose: bool, dry: bool):
         UV.bump_version("stable"),
         Git.add(UV.LOCK, PyProject.CONFIG),
     ]
-    if verbose:
+    if not silent:
         cmds.append(UV.version())
     cmd = Command(
         f"{EMOJIS.ROCKET} release on branch {dest}",
         *cmds,
     )
-    run_cmd(cmd, verbose, dry)
+    run_cmd(cmd, not silent, dry)

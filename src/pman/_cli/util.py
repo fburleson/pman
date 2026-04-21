@@ -28,10 +28,10 @@ def global_options(f):
         help=f"Perform a dry run, only showing the commands, not executing. {EMOJIS.DRY_FACE}",
     )(f)
     f = click.option(
-        "--verbose",
+        "--silent",
         is_flag=True,
         default=False,
-        help=f"Display verbose output. {EMOJIS.MEGAPHONE}",
+        help=f"Do not display verbose output. {EMOJIS.MEGAPHONE}",
     )(f)
     return f
 
