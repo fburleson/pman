@@ -1,6 +1,6 @@
 # pman 😎
 
-A cli tool for easier project management 😎
+A cli tool for easier project management with git and uv 😎
 
 ## Installation
 

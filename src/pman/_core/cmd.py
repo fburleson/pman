@@ -31,8 +31,9 @@ class AtomicCommand:
         def result(self) -> Result:
             return self._result
 
-    def __init__(self, cmd: Iterable[str]):
+    def __init__(self, cmd: Iterable[str], *, ask: bool = False):
         self._cmd: tuple[str, ...] = tuple(cmd)
+        self._ask: bool = ask
 
     def __str__(self):
         return f">\t{'\t'.join(self._cmd)}"
@@ -54,7 +55,7 @@ class Command:
     @dataclass
     class Settings:
         verbose_cmd: bool = True
-        verbose_output: bool = True
+        verbose_output: bool = False
 
     def __init__(self, name: str, *cmds: AtomicCommand):
         self._name = name
@@ -64,7 +65,8 @@ class Command:
     def __str__(self) -> str:
         return self._name
 
-    def run(self) -> tuple[Result, ...]:
+    def run(self, *, verbose: bool = False) -> tuple[Result, ...]:
+        self._settings.verbose_output = verbose
         if self._settings.verbose_cmd:
             print(self)
         results: list[Result] = list()
@@ -88,6 +90,11 @@ class Command:
                         else:
                             print(result, end="\n\n")
         return tuple(results)
+
+    def run_dry(self):
+        print(self, "(dry)")
+        for atomic_cmd in self.atomic_commands:
+            print(atomic_cmd)
 
     @property
     def name(self) -> str:
