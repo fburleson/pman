@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Iterable
 
 from rich import print
+from rich.prompt import Confirm
 from rich.status import Status
 
 from pman._cli.util import EMOJIS
@@ -27,7 +28,7 @@ class Result(subprocess.CompletedProcess[str]):
 
 
 class AtomicCommand:
-    class AtomicCommandError(RuntimeError):
+    class RuntimeError(RuntimeError):
         def __init__(self, result: Result):
             super().__init__(result.stderr)
             self._result: Result = result
@@ -42,9 +43,8 @@ class AtomicCommand:
         def result(self) -> Result:
             return self._result
 
-    def __init__(self, cmd: Iterable[str], *, ask: bool = False):
+    def __init__(self, cmd: Iterable[str]):
         self._cmd: tuple[str, ...] = tuple(cmd)
-        self._ask: bool = ask
 
     def __str__(self) -> str:
         return f"{__package__.partition('.')[0]}>\t{'\t'.join(self._cmd)}"  # type: ignore
@@ -52,23 +52,41 @@ class AtomicCommand:
     def __rich__(self) -> str:
         return f"[bold]{__package__.partition('.')[0]}[/]>\t[italic]{'\t'.join(self._cmd)}[/]"  # type: ignore
 
-    def run(self, *, verbose: bool = True, dry: bool = False) -> Result:
+    def run(
+        self, *, verbose: bool = True, dry: bool = False, ask: bool = False
+    ) -> Result:
         if verbose:
             print(f"[{'dim' if dry else 'none'}]{self.__rich__()}[/]")
         if dry:
             result = Result(self._cmd, returncode=0, stdout=str(), stderr=str())
         else:
-            try:
-                result = subprocess.run(self._cmd, capture_output=True, text=True)
-            except FileNotFoundError:
-                result = subprocess.run(
-                    self._cmd, capture_output=True, shell=True, text=True
-                )
+            if ask:
+                if not verbose:
+                    print(f"[{'dim' if dry else 'none'}]{self.__rich__()}[/]")
+                is_confirmed = Confirm.ask("execute?")
+                if not is_confirmed:
+                    raise AtomicCommand.RuntimeError(
+                        Result(
+                            self._cmd,
+                            returncode=1,
+                            stdout=str(),
+                            stderr=f"You canceled {EMOJIS.CONFUSED}",
+                        )
+                    )
+            with Status("[bold green][/]", spinner="dots"):
+                try:
+                    result = subprocess.run(self._cmd, capture_output=True, text=True)
+                except FileNotFoundError:
+                    result = subprocess.run(
+                        self._cmd, capture_output=True, shell=True, text=True
+                    )
         result = Result(**vars(result))
         if result.returncode != 0:
-            raise AtomicCommand.AtomicCommandError(result)
+            raise AtomicCommand.RuntimeError(result)
         if verbose and not str(result).isspace():
             print(result, end="\n\n")
+        elif ask:
+            print("")
         return result
 
 
@@ -89,18 +107,19 @@ class Command:
     def __rich__(self) -> str:
         return f"[bold]{self}[/]"
 
-    def run(self, *, verbose: bool = True, dry: bool = False) -> tuple[Result, ...]:
+    def run(
+        self, *, verbose: bool = True, dry: bool = False, ask: bool = False
+    ) -> tuple[Result, ...]:
         if verbose:
             print(f"{self.__rich__()} {f'(dry {EMOJIS.DRY_FACE})' if dry else str()}")
         results: list[Result] = list()
         for atomic_cmd in self.atomic_commands:
             try:
-                with Status("[bold green][/]", spinner="dots"):
-                    result: Result = atomic_cmd.run(verbose=verbose, dry=dry)
-            except AtomicCommand.AtomicCommandError as e:
+                result: Result = atomic_cmd.run(verbose=verbose, dry=dry, ask=ask)
+            except AtomicCommand.RuntimeError as e:
                 results.append(e.result)
                 if not verbose:
-                    print(self)
+                    print(f"{self.__rich__()} {EMOJIS.CROSS}")
                 print(e)
                 print(f"[bold blink red]pman has failed[/] {EMOJIS.SAD_FACE}")
                 return tuple(results)

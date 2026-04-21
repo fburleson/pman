@@ -15,13 +15,15 @@ from pman._core.cmd import Command
     help=f"Stay on the current branch. {EMOJIS.MAN_STANDING}",
 )
 @global_options
-def add(branch_type: BranchType, name: str, stay: bool, silent: bool, dry: bool):
+def add(
+    branch_type: BranchType, name: str, stay: bool, silent: bool, dry: bool, ask: bool
+):
     """Add a work branch to your local git repo."""
     branch_type = BranchType(branch_type)
     branch_name: str = f"{branch_type}/{name}"
     init_branch: str = str()
     if stay:
-        init_branch = Git.current_branch().run().stdout.strip()
+        init_branch = Git.current_branch().run(verbose=not silent).stdout.strip()
     cmds: list = [
         Git.branch(branch_name),
         Git.checkout(branch_name),
@@ -37,7 +39,7 @@ def add(branch_type: BranchType, name: str, stay: bool, silent: bool, dry: bool)
         f"{EMOJIS.WORKING}  create work branch {branch_name}",
         *cmds,
     )
-    cmd.run(verbose=not silent, dry=dry)
+    cmd.run(verbose=not silent, dry=dry, ask=ask)
 
 
 @click.command()
@@ -54,10 +56,12 @@ def add(branch_type: BranchType, name: str, stay: bool, silent: bool, dry: bool)
     show_default=True,
 )
 @global_options
-def finish(dest: str, remote: str, silent: bool, dry: bool):
+def finish(dest: str, remote: str, silent: bool, dry: bool, ask: bool):
     """Merge squash and delete branch."""
-    init_branch: str = Git.current_branch().run().stdout.strip()
-    remote_branches: list = Git.remote_branches().run().stdout.strip().split()
+    init_branch: str = Git.current_branch().run(verbose=not silent).stdout.strip()
+    remote_branches: list = (
+        Git.remote_branches().run(verbose=not silent).stdout.strip().split()
+    )
     remote_branches = [
         branch_name.removeprefix(remote + "/") for branch_name in remote_branches
     ]
@@ -72,7 +76,7 @@ def finish(dest: str, remote: str, silent: bool, dry: bool):
         f"{EMOJIS.PACKAGE} finish on branch {init_branch}",
         *cmds,
     )
-    cmd.run(verbose=not silent, dry=dry)
+    cmd.run(verbose=not silent, dry=dry, ask=ask)
 
 
 @click.command()
@@ -89,7 +93,7 @@ def finish(dest: str, remote: str, silent: bool, dry: bool):
     show_default=True,
 )
 @global_options
-def release(dest: str, src: str, silent: bool, dry: bool):
+def release(dest: str, src: str, silent: bool, dry: bool, ask: bool):
     """Merge squash to release branch and bump version to release."""
     cmds: list = [
         # UV.bump_version("dev", "patch"),
@@ -104,4 +108,4 @@ def release(dest: str, src: str, silent: bool, dry: bool):
         f"{EMOJIS.ROCKET} release on branch {dest}",
         *cmds,
     )
-    cmd.run(verbose=not silent, dry=dry)
+    cmd.run(verbose=not silent, dry=dry, ask=ask)

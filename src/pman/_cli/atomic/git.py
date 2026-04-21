@@ -11,9 +11,7 @@ class Git:
 
     @staticmethod
     def delete_branch(name: str, force: bool = False) -> AtomicCommand:
-        return AtomicCommand(
-            [Git.CMD, "branch", "-D" if force else "-d", name], ask=True
-        )
+        return AtomicCommand([Git.CMD, "branch", "-D" if force else "-d", name])
 
     @staticmethod
     def checkout(name: str) -> AtomicCommand:
