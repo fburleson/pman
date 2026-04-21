@@ -3,7 +3,7 @@ import click
 from pman._cli.atomic.git import Git
 from pman._cli.atomic.uv import UV
 from pman._cli.util import EMOJIS, BranchType, PyProject, global_options
-from pman._core.cmd import Command, run_cmd
+from pman._core.cmd import Command
 
 
 @click.command()
@@ -19,7 +19,9 @@ def add(branch_type: BranchType, name: str, stay: bool, silent: bool, dry: bool)
     """Add a work branch to your local git repo."""
     branch_type = BranchType(branch_type)
     branch_name: str = f"{branch_type}/{name}"
-    init_branch: str = Git.current_branch().run().stdout.strip()
+    init_branch: str = str()
+    if stay:
+        init_branch = Git.current_branch().run().stdout.strip()
     cmds: list = [
         Git.branch(branch_name),
         Git.checkout(branch_name),
@@ -35,7 +37,7 @@ def add(branch_type: BranchType, name: str, stay: bool, silent: bool, dry: bool)
         f"{EMOJIS.WORKING}  create work branch {branch_name}",
         *cmds,
     )
-    run_cmd(cmd, not silent, dry)
+    cmd.run(verbose=not silent, dry=dry)
 
 
 @click.command()
@@ -70,7 +72,7 @@ def finish(dest: str, remote: str, silent: bool, dry: bool):
         f"{EMOJIS.PACKAGE} finish on branch {init_branch}",
         *cmds,
     )
-    run_cmd(cmd, not silent, dry)
+    cmd.run(verbose=not silent, dry=dry)
 
 
 @click.command()
@@ -102,4 +104,4 @@ def release(dest: str, src: str, silent: bool, dry: bool):
         f"{EMOJIS.ROCKET} release on branch {dest}",
         *cmds,
     )
-    run_cmd(cmd, not silent, dry)
+    cmd.run(verbose=not silent, dry=dry)
