@@ -16,6 +16,7 @@ class EMOJIS:
     MAN_STANDING: str = "🧍"
     MONOCLE: str = "🧐"
     CONFUSED: str = "🤨"
+    CLIPPER: str = "🎬"
 
 
 class PyProject:

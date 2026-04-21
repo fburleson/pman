@@ -3,7 +3,7 @@ import click
 from pman._cli.atomic.git import Git
 from pman._cli.atomic.uv import UV
 from pman._cli.util import EMOJIS, BranchType, PyProject, global_options
-from pman._core.cmd import Command
+from pman._core.cmd import AtomicCommand, Command
 
 
 @click.command()
@@ -96,7 +96,6 @@ def finish(dest: str, remote: str, silent: bool, dry: bool, ask: bool):
 def release(dest: str, src: str, silent: bool, dry: bool, ask: bool):
     """Merge squash to release branch and bump version to release."""
     cmds: list = [
-        # UV.bump_version("dev", "patch"),
         Git.checkout(dest),
         Git.merge_squash(src),
         UV.bump_version("stable"),
@@ -106,6 +105,43 @@ def release(dest: str, src: str, silent: bool, dry: bool, ask: bool):
         cmds.append(UV.version())
     cmd = Command(
         f"{EMOJIS.ROCKET} release on branch {dest}",
+        *cmds,
+    )
+    cmd.run(verbose=not silent, dry=dry, ask=ask)
+
+
+@click.command()
+@click.option(
+    "--dest",
+    default=".",
+    help="The project folder.",
+    show_default=True,
+)
+@click.option(
+    "--islib",
+    default=True,
+    help="Toggle lib mode.",
+    show_default=True,
+)
+@global_options
+def init(dest: str, islib: bool, silent: bool, dry: bool, ask: bool):
+    """Initialize a project."""
+    cmds: list = [
+        AtomicCommand(
+            [
+                UV.CMD_TOOL,
+                "copier",
+                "copy",
+                "--trust",
+                "--data",
+                f"is_lib={str(islib)}",
+                "https://github.com/fburleson/pyuv-copier-template.git",
+                dest,
+            ]
+        )
+    ]
+    cmd = Command(
+        f"{EMOJIS.CLIPPER} initialize project",
         *cmds,
     )
     cmd.run(verbose=not silent, dry=dry, ask=ask)

@@ -3,6 +3,7 @@ from pman._core.cmd import AtomicCommand
 
 class UV:
     CMD: str = "uv"
+    CMD_TOOL = "uvx"
     LOCK: str = "uv.lock"
 
     @staticmethod
