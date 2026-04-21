@@ -1,0 +1,147 @@
+import click
+
+from pman._cli.atomic.git import Git
+from pman._cli.atomic.uv import UV
+from pman._cli.util import EMOJIS, BranchType, PyProject, global_options
+from pman._core.cmd import AtomicCommand, Command
+
+
+@click.command()
+@click.argument("branch_type", type=click.Choice([type.value for type in BranchType]))
+@click.argument("name")
+@click.option(
+    "--stay",
+    is_flag=True,
+    help=f"Stay on the current branch. {EMOJIS.MAN_STANDING}",
+)
+@global_options
+def add(
+    branch_type: BranchType, name: str, stay: bool, silent: bool, dry: bool, ask: bool
+):
+    """Add a work branch to your local git repo."""
+    branch_type = BranchType(branch_type)
+    branch_name: str = f"{branch_type}/{name}"
+    init_branch: str = str()
+    if stay:
+        init_branch = Git.current_branch().run(verbose=not silent).stdout.strip()
+    cmds: list = [
+        Git.branch(branch_name),
+        Git.checkout(branch_name),
+        UV.bump_version("dev"),
+        Git.add(UV.LOCK, PyProject.CONFIG),
+        Git.commit(BranchType("chore"), "bumped dev version", "version"),
+    ]
+    if stay:
+        cmds.append(Git.checkout(init_branch))
+    if not silent:
+        cmds.append(Git.list_branches())
+    cmd = Command(
+        f"{EMOJIS.WORKING}  create work branch {branch_name}",
+        *cmds,
+    )
+    cmd.run(verbose=not silent, dry=dry, ask=ask)
+
+
+@click.command()
+@click.option(
+    "--dest",
+    default="dev",
+    help="The branch to merge to.",
+    show_default=True,
+)
+@click.option(
+    "--remote",
+    default="origin",
+    help="Remote repository name.",
+    show_default=True,
+)
+@global_options
+def finish(dest: str, remote: str, silent: bool, dry: bool, ask: bool):
+    """Merge squash and delete branch."""
+    init_branch: str = Git.current_branch().run(verbose=not silent).stdout.strip()
+    remote_branches: list = (
+        Git.remote_branches().run(verbose=not silent).stdout.strip().split()
+    )
+    remote_branches = [
+        branch_name.removeprefix(remote + "/") for branch_name in remote_branches
+    ]
+    cmds: list = [
+        Git.checkout(dest),
+        Git.merge_squash(init_branch),
+        Git.delete_branch(init_branch, force=True),
+    ]
+    if dest in remote_branches:
+        cmds.insert(1, Git.pull())
+    cmd = Command(
+        f"{EMOJIS.PACKAGE} finish on branch {init_branch}",
+        *cmds,
+    )
+    cmd.run(verbose=not silent, dry=dry, ask=ask)
+
+
+@click.command()
+@click.option(
+    "--dest",
+    default="main",
+    help="The branch to release to.",
+    show_default=True,
+)
+@click.option(
+    "--src",
+    default="dev",
+    help="The branch to merge from.",
+    show_default=True,
+)
+@global_options
+def release(dest: str, src: str, silent: bool, dry: bool, ask: bool):
+    """Merge squash to release branch and bump version to release."""
+    cmds: list = [
+        Git.checkout(dest),
+        Git.merge_squash(src),
+        UV.bump_version("stable"),
+        Git.add(UV.LOCK, PyProject.CONFIG),
+    ]
+    if not silent:
+        cmds.append(UV.version())
+    cmd = Command(
+        f"{EMOJIS.ROCKET} release on branch {dest}",
+        *cmds,
+    )
+    cmd.run(verbose=not silent, dry=dry, ask=ask)
+
+
+@click.command()
+@click.option(
+    "--dest",
+    default=".",
+    help="The project folder.",
+    show_default=True,
+)
+@click.option(
+    "--islib",
+    default=True,
+    help="Toggle lib mode.",
+    show_default=True,
+)
+@global_options
+def init(dest: str, islib: bool, silent: bool, dry: bool, ask: bool):
+    """Initialize a project."""
+    cmds: list = [
+        AtomicCommand(
+            [
+                UV.CMD_TOOL,
+                "copier",
+                "copy",
+                "--trust",
+                "--data",
+                f"is_lib={str(islib)}",
+                "https://github.com/fburleson/pyuv-copier-template.git",
+                dest,
+            ]
+        )
+    ]
+    cmd = Command(
+        f"{EMOJIS.CLIPPER} initialize project",
+        *cmds,
+    )
+    cmd.run(verbose=not silent, dry=dry, ask=ask)
