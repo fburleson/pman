@@ -46,15 +46,15 @@ class AtomicCommand:
         self._cmd: tuple[str, ...] = tuple(cmd)
         self._ask: bool = ask
 
-    def __str__(self):
-        return f">\t{'\t'.join(self._cmd)}"
+    def __str__(self) -> str:
+        return f"{__package__.partition('.')[0]}>\t{'\t'.join(self._cmd)}"  # type: ignore
 
-    def __rich__(self):
-        return f">\t[italic]{'\t'.join(self._cmd)}[/]"
+    def __rich__(self) -> str:
+        return f"[bold]{__package__.partition('.')[0]}[/]>\t[italic]{'\t'.join(self._cmd)}[/]"  # type: ignore
 
     def run(self, *, verbose: bool = True, dry: bool = False) -> Result:
         if verbose:
-            print(f"[{'dim' if dry else 'none'}]{self}[/]")
+            print(f"[{'dim' if dry else 'none'}]{self.__rich__()}[/]")
         if dry:
             result = Result(self._cmd, returncode=0, stdout=str(), stderr=str())
         else:
@@ -87,11 +87,11 @@ class Command:
         return self._name
 
     def __rich__(self) -> str:
-        return f"[bold]{str(self)}[/]"
+        return f"[bold]{self}[/]"
 
     def run(self, *, verbose: bool = True, dry: bool = False) -> tuple[Result, ...]:
         if verbose:
-            print(f"{self} {f'(dry {EMOJIS.DRY_FACE})' if dry else str()}")
+            print(f"{self.__rich__()} {f'(dry {EMOJIS.DRY_FACE})' if dry else str()}")
         results: list[Result] = list()
         for atomic_cmd in self.atomic_commands:
             try:
