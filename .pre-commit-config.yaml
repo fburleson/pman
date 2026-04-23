@@ -37,6 +37,7 @@ repos:
         language: system
         types: [python]
         pass_filenames: true
+        always_run: true
         stages: [pre-commit]
 
       - id: pytest
