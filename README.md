@@ -12,7 +12,7 @@ A cli tool for easier project management with git and uv 😎
 
 #### uv
 ```bash
-uv add git+https://github.com/fburleson/pman.git
+uv tool install git+https://github.com/fburleson/pman.git
 ```
 
 #### pip
