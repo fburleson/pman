@@ -1,6 +1,6 @@
 [project]
 name = "pman"
-version = "0.2.0.dev1"
+version = "0.3.0.dev1"
 description = "A cli tool for easier project management with git and uv 😎"
 readme = "README.md"
 authors = [
