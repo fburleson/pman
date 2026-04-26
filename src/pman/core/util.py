@@ -8,3 +8,4 @@ class TaskType(StrEnum):
     CHORE = "chore"
     DOCS = "docs"
     STYLE = "style"
+    TEST = "test"
