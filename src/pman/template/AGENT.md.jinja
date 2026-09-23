@@ -1,0 +1,28 @@
+# AGENT.md
+
+## Toolchain
+
+- **Package manager:** `uv` (not pip). Install deps: `uv sync`.
+- **Python:** See `.python-version`
+
+## References
+
+- **README.md** — project overview, usage, and install instructions.
+
+## Conventions
+
+{% if lib %}
+- **Layout:** PEP 517 `src/` layout — code in `src/{{ project_name | replace("-", "_") }}/`.
+{% else %}
+- **Layout:** package-free layout — entry point in `src/main.py`.
+{% endif %}
+- **Commits:** Conventional Commits, enforced by a pre-commit commit-msg hook.
+- **Quality:** ruff (lint + format), pyright (type checking), and pytest (tests) run on every commit via pre-commit.
+
+## Development
+
+- `uv sync` — install dependencies
+- `uv run pytest` — run the test suite
+- `uv run ruff check --fix` — lint and auto-fix
+- `uv run ruff format` — format code
+- `uv run pyright` — type check
