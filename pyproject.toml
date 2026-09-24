@@ -1,6 +1,6 @@
 [project]
 name = "pman"
-version = "0.1.0.dev2"
+version = "0.2.0.dev1"
 description = "Add your description here"
 readme = "README.md"
 authors = [
