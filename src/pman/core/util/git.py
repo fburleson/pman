@@ -38,6 +38,15 @@ def worktree_remove(dir: Path, name: str):
     return Command(("git", "worktree", "remove", name)).exec(dir)
 
 
+def tag(dir: Path, name: str, *, message: str | None = None):
+    cmd: list[str] = ["git", "tag"]
+    if message is None:
+        cmd.append(name)
+    else:
+        cmd.extend(["-a", name, "-m", message])
+    return Command(cmd).exec(dir)
+
+
 def merge(dir: Path, merge_branch: str, *, squash: bool = True):
     if squash:
         Command(("git", "merge", merge_branch, "--squash")).exec(dir)

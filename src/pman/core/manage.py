@@ -74,11 +74,13 @@ def release(
     git.checkout(dir, MAIN_BRANCH)
     git.merge(dir, DEV_BRANCH, squash=True)
     uv.version_bump(dir, [SemVer.STABLE])
+    version = uv.version(dir, short=True)
     git.commit(
         dir,
         ConventionalType.CHORE,
-        message=f"v{uv.version(dir, short=True)}",
+        message=f"v{version}",
         description=description,
         tag=LIB_NAME,
     )
+    git.tag(dir, f"v{version}", message=f"v{version}")
     _bump_version_dev(dir, next_release)
