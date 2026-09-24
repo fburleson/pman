@@ -4,25 +4,35 @@
 
 - **Package manager:** `uv` (not pip). Install deps: `uv sync`.
 - **Python:** See `.python-version`
+- **External requirements:** `git`
 
-## References
+## Commands
 
-- **README.md** — project overview, usage, and install instructions.
+Run everything via `uv run`**pman** is a CLI that automates the lifecycle of a Python project using `uv`, `git` and `pi` agent CLI.
+
+| Task | Command |
+| --- | --- |
+| Install deps | `uv sync` |
+| Tests | `uv run pytest` |
+| Lint (auto-fix) | `uv run ruff check --fix` |
+| Format | `uv run ruff format` (ruff is the formatter) |
+| Type check | `uv run pyright` |
+| Lock validation | `uv lock --check` |
+| Build | `uv build` |
+
+`pre-commit` (`.pre-commit-config.yaml`) runs conventional commit checking (`commit-msg`), `uv lock --check`, ruff (check + format), pyright, and pytest on every commit.
+
+## Layout
+
+{% if lib %}
+PEP 517 `src/` layout — code lives in `src/{{ project_name | replace("-", "_") }}/`, not the package root.
+{% else %}
+Package-free layout — entry point at `src/main.py`.
+{% endif %}
 
 ## Conventions
 
-{% if lib %}
-- **Layout:** PEP 517 `src/` layout — code in `src/{{ project_name | replace("-", "_") }}/`.
-{% else %}
-- **Layout:** package-free layout — entry point in `src/main.py`.
-{% endif %}
-- **Commits:** Conventional Commits, enforced by a pre-commit commit-msg hook.
+- **Commits:** Conventional Commits (`feat`, `fix`, `chore`, ...), enforced by a pre-commit `commit-msg` hook.
 - **Quality:** ruff (lint + format), pyright (type checking), and pytest (tests) run on every commit via pre-commit.
-
-## Development
-
-- `uv sync` — install dependencies
-- `uv run pytest` — run the test suite
-- `uv run ruff check --fix` — lint and auto-fix
-- `uv run ruff format` — format code
-- `uv run pyright` — type check
+- **Branches:** long-lived `main` (releases) and `dev` (integration) branches; feature work goes on conventional branches.
+- **Versioning:** managed via `uv version`; keep `main` and `dev` in sync.
