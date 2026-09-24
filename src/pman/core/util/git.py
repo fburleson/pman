@@ -66,5 +66,6 @@ def commit(
     _tag: str = "" if tag is None else f"({tag})"
     cmd = ["git", "commit", "-m", f"{type}{_tag}: {message}"]
     if description is not None:
-        cmd.extend(["-m", description])
+        for line in description.split("\n"):
+            cmd.extend(["-m", line])
     return Command(cmd).exec(dir)
