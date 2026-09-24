@@ -8,6 +8,7 @@ from pman.core.init import init as core_init
 from pman.core.manage import release as core_release
 from pman.core.manage import todev as core_todev
 from pman.core.manage import workbranch as core_branch
+from pman.core.todo import todo as core_todo
 from pman.core.util import ConventionalType, SemVer
 
 cli = typer.Typer(name="pman", no_args_is_help=True)
@@ -120,6 +121,14 @@ def deploy(
 ):
     """Deploy a Pi agent into a worktree with a prompt and/or plan."""
     core_deploy(dir, type=type, name=name, prompt=prompt, plan=plan)
+
+
+@cli.command()
+def todo(
+    dir: Annotated[Path, typer.Option(help="Directory of the project")] = Path("."),
+):
+    """List TODOs and FIXMEs found in the source tree."""
+    core_todo(dir)
 
 
 if __name__ == "__main__":
