@@ -2,11 +2,17 @@ from pathlib import Path
 
 from pman import LIB_NAME
 from pman.core.util import ConventionalType, SemVer, git, uv
-from pman.core.util.util import BRANCH_NAME_TEMPLATE, DEV_BRANCH, MAIN_BRANCH
+from pman.core.util.util import (
+    BRANCH_NAME_TEMPLATE,
+    DEV_BRANCH,
+    MAIN_BRANCH,
+    PmanError,
+    atomic,
+    pman,
+)
 
-# TODO(fburleson): add atomicity to certain functions, to avoid invalid states after failure
 
-
+@pman
 def workbranch(dir: Path, type: ConventionalType, name: str, *, checkout: bool = True):
     branch_name = BRANCH_NAME_TEMPLATE.substitute(type=type, name=name)
     git.branch(dir, branch_name)
@@ -14,37 +20,35 @@ def workbranch(dir: Path, type: ConventionalType, name: str, *, checkout: bool =
         git.checkout(dir, branch_name)
 
 
+@atomic
+@pman
 def todev(
     dir: Path,
-    *,
     message: str,
+    *,
+    branch: str | None = None,
     description: str | None = None,
     tag: str | None = None,
     delete: bool = False,
-    branch: str | None = None,
-    worktree: bool = False,
 ):
-    if branch is None:
-        branch_to_merge: str = git.branch_current(dir)
-    else:
-        branch_to_merge: str = branch
+    current_branch: str = git.branch_current(dir)
+    if current_branch == DEV_BRANCH or current_branch == MAIN_BRANCH:
+        raise PmanError(f"Cannot call `todev` on branch {current_branch}")
+    _branch: str = current_branch if branch is None else branch
     git.checkout(dir, DEV_BRANCH)
-    # TODO(fburleson): stash uncomitted changes
-    git.merge(dir, branch_to_merge, squash=True)
-    uv.version_bump(dir, [SemVer.DEV])
+    git.merge(dir, _branch, squash=True)
     # TODO(fburleson): handle merge conflicts
+    uv.version_bump(dir, [SemVer.DEV])
     git.add(dir)
     git.commit(
         dir,
-        ConventionalType(branch_to_merge.split("/")[0]),
+        ConventionalType(_branch.split("/")[0]),
         message=message,
         description=description,
         tag=tag,
     )
     if delete:
-        if worktree:
-            git.worktree_remove(dir, branch_to_merge)
-        git.branch_delete(dir, branch_to_merge)
+        git.branch_delete(dir, _branch)
 
 
 def _bump_version_dev(dir: Path, next_version: SemVer):
@@ -59,6 +63,8 @@ def _bump_version_dev(dir: Path, next_version: SemVer):
     )
 
 
+@atomic
+@pman
 def release(
     dir: Path, *, description: str | None = None, next_release: SemVer = SemVer.PATCH
 ):
