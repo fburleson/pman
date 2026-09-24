@@ -64,25 +64,22 @@ def todev(
     delete: Annotated[
         bool, typer.Option(help="Delete the current branch after merging into dev")
     ] = False,
+    branch: Annotated[
+        str | None, typer.Option(help="Branch to merge into dev, defaults to current")
+    ] = None,
     worktree: Annotated[
         str | None, typer.Option(help="Worktree to merge into dev")
     ] = None,
 ):
     """Merge a branch (current or worktree) into dev."""
-    if worktree is None:
-        core_todev(
-            dir, message=message, description=description, tag=tag, delete=delete
-        )
-    else:
-        core_todev(
-            dir,
-            message=message,
-            description=description,
-            tag=tag,
-            delete=delete,
-            branch=worktree,
-            worktree=True,
-        )
+    core_todev(
+        dir,
+        message=message,
+        branch=branch,
+        description=description,
+        tag=tag,
+        delete=delete,
+    )
 
 
 @cli.command()
