@@ -73,9 +73,12 @@ class Command:
 
     def _print_info(self, result: subprocess.CompletedProcess[str]):
         if result.returncode == 0:
-            out = Tree("[green]:heavy_check_mark:   [/green]" + str(self.__rich__()))
+            out = Tree(
+                "[green]:heavy_check_mark:   [/green]" + str(self.__rich__()),
+                highlight=True,
+            )
             if result.stdout is not None and result.stdout.strip():
-                out.add(f"[dim]{result.stdout.strip()}\n[/]")
+                out.add(f"[dim]{result.stdout.strip()}\n[/]", highlight=True)
         else:
             out = Tree("[red]:x:   [/red]" + str(self.__rich__()))
             if result.stderr is not None and result.stderr.strip():
