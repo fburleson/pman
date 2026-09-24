@@ -1,6 +1,6 @@
 # pman 😎
 
-**pman** is a CLI that automates the lifecycle of a Python project using `uv`, `git` and `pi` agent CLI.
+**pman** is a CLI that automates the lifecycle of a Python project using `uv`, `git`, `gh-cli` and `pi` agent CLI.
 
 ## Features
 
@@ -18,7 +18,7 @@
 
 ## Install
 
-Requires Python 3.14+, `git`, [`uv`](https://docs.astral.sh/uv/), and [`pi`](https://pi.dev/)
+Requires Python 3.14+, [`git`](https://git-scm.com/), [`gh-cli`](https://cli.github.com/), [`uv`](https://docs.astral.sh/uv/#installation), and [`pi`](https://pi.dev/)
 
 ```bash
 uv tool install pman   # or: pip install pman
