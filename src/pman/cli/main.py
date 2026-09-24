@@ -28,10 +28,18 @@ def init(
     trust: Annotated[
         bool, typer.Option(help="Trust the copier template source")
     ] = False,
+    remote: Annotated[
+        bool, typer.Option(help="Create a remote repository and push branches")
+    ] = False,
 ):
     """Initialize a new project with uv, git, and the pman template."""
     core_init(
-        dir.resolve(), lib=lib, project_name=project_name, author=author, trust=trust
+        dir.resolve(),
+        lib=lib,
+        project_name=project_name,
+        author=author,
+        trust=trust,
+        remote=remote,
     )
 
 

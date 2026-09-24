@@ -8,7 +8,7 @@ import copier
 from copier.user_data import datetime
 
 from pman import LIB_NAME
-from pman.core.util import ConventionalType, git, uv
+from pman.core.util import ConventionalType, gh, git, uv
 from pman.core.util.util import DEV_BRANCH, MAIN_BRANCH, pman
 from pman.template import TEMPLATE_DIR
 
@@ -98,6 +98,11 @@ def _setup_dev_branch(dir: Path):
     )
 
 
+def _init_remote(dir: Path):
+    gh.create_remote(dir)
+    git.push_upstream(dir, (DEV_BRANCH, MAIN_BRANCH))
+
+
 @pman
 def init(
     dir: Path,
@@ -106,6 +111,7 @@ def init(
     project_name: str | None = None,
     author: str = "John Doe",
     trust: bool = False,
+    remote: bool = False,
 ):
     if dir.exists() and any(dir.iterdir()):
         raise FileExistsError(f"{dir} is not empty")
@@ -130,6 +136,8 @@ def init(
         )
         _install_pre_commit(dir)
         _setup_dev_branch(dir)
+        if remote:
+            _init_remote(dir)
     except Exception:
         if dir.exists():
             for child in dir.iterdir():

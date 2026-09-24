@@ -49,9 +49,13 @@ def tag(dir: Path, name: str, *, message: str | None = None):
 
 def merge(dir: Path, merge_branch: str, *, squash: bool = True):
     if squash:
-        Command(("git", "merge", merge_branch, "--squash")).exec(dir)
+        return Command(("git", "merge", merge_branch, "--squash")).exec(dir)
     else:
-        Command(("git", "merge", merge_branch)).exec(dir)
+        return Command(("git", "merge", merge_branch)).exec(dir)
+
+
+def push_upstream(dir: Path, branches: Iterable[str]):
+    return Command(("git", "push", "-u", "origin", *branches)).exec(dir)
 
 
 def commit(
