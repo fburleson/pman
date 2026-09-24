@@ -30,6 +30,7 @@ def todev(
     description: str | None = None,
     tag: str | None = None,
     delete: bool = False,
+    worktree: bool = False,
 ):
     current_branch: str = git.branch_current(dir)
     if current_branch == DEV_BRANCH or current_branch == MAIN_BRANCH:
@@ -48,6 +49,8 @@ def todev(
         tag=tag,
     )
     if delete:
+        if worktree:
+            git.worktree_remove(dir, _branch)
         git.branch_delete(dir, _branch)
 
 

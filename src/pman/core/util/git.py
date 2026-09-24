@@ -34,6 +34,10 @@ def worktree(dir: Path, path: Path, branch: str):
     return Command(("git", "worktree", "add", "-b", branch, str(path))).exec(dir)
 
 
+def worktree_remove(dir: Path, name: str):
+    return Command(("git", "worktree", "remove", name)).exec(dir)
+
+
 def merge(dir: Path, merge_branch: str, *, squash: bool = True):
     if squash:
         Command(("git", "merge", merge_branch, "--squash")).exec(dir)
