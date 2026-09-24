@@ -67,9 +67,6 @@ def todev(
     branch: Annotated[
         str | None, typer.Option(help="Branch to merge into dev, defaults to current")
     ] = None,
-    worktree: Annotated[
-        str | None, typer.Option(help="Worktree to merge into dev")
-    ] = None,
 ):
     """Merge a branch (current or worktree) into dev."""
     core_todev(
