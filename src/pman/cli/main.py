@@ -5,6 +5,7 @@ import typer
 
 from pman.core.agent import deploy_to_worktree as core_deploy
 from pman.core.init import init as core_init
+from pman.core.manage import commit as core_commit
 from pman.core.manage import release as core_release
 from pman.core.manage import todev as core_todev
 from pman.core.manage import workbranch as core_branch
@@ -58,6 +59,33 @@ def branch(
 ):
     """Create a conventional branch (e.g. `feat/name`)."""
     core_branch(dir, type=type, name=name, checkout=checkout)
+
+
+@cli.command()
+def commit(
+    type: Annotated[
+        ConventionalType,
+        typer.Argument(help="Conventional commit type, e.g. feat, fix, chore"),
+    ],
+    message: Annotated[str, typer.Argument(help="Commit message")],
+    dir: Annotated[Path, typer.Option(help="Directory of the project")] = Path("."),
+    description: Annotated[
+        str | None, typer.Option(help="Additional commit description")
+    ] = None,
+    ai: Annotated[bool, typer.Option(help="Generate an AI commit description")] = False,
+    tag: Annotated[
+        str | None, typer.Option(help="Conventional commit tag, e.g. scope")
+    ] = None,
+) -> None:
+    """Commit project changes using a conventional commit message."""
+    core_commit(
+        dir,
+        type=type,
+        message=message,
+        description=description,
+        tag=tag,
+        ai=ai,
+    )
 
 
 @cli.command()

@@ -20,6 +20,26 @@ def workbranch(dir: Path, type: ConventionalType, name: str, *, checkout: bool =
         git.checkout(dir, branch_name)
 
 
+@pman
+def commit(
+    dir: Path,
+    type: ConventionalType,
+    message: str,
+    *,
+    description: str | None = None,
+    tag: str | None = None,
+    ai: bool = False,
+) -> None:
+    git.commit(
+        dir,
+        type,
+        message=message,
+        description=description,
+        tag=tag,
+        ai=ai,
+    )
+
+
 @atomic
 @pman
 def todev(
