@@ -1,6 +1,6 @@
 # pman 😎
 
-**pman** is a CLI that automates the lifecycle of a Python project using `uv`, `git`, `gh-cli` and `pi` agent CLI.
+**pman** is a CLI that automates the lifecycle of a Python project using `uv`, `git`, `gh-cli`, `github` and `pi` agent CLI.
 
 ## Features
 
