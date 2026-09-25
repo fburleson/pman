@@ -31,6 +31,7 @@ def todev(
     tag: str | None = None,
     delete: bool = False,
     worktree: bool = False,
+    ai: bool = False,
 ):
     current_branch: str = git.branch_current(dir)
     if current_branch == DEV_BRANCH or current_branch == MAIN_BRANCH:
@@ -47,6 +48,7 @@ def todev(
         message=message,
         description=description,
         tag=tag,
+        ai=ai,
     )
     if delete:
         if worktree:
@@ -69,7 +71,11 @@ def _bump_version_dev(dir: Path, next_version: SemVer):
 @atomic
 @pman
 def release(
-    dir: Path, *, description: str | None = None, next_release: SemVer = SemVer.PATCH
+    dir: Path,
+    *,
+    description: str | None = None,
+    ai: bool = False,
+    next_release: SemVer = SemVer.PATCH,
 ):
     git.checkout(dir, MAIN_BRANCH)
     git.merge(dir, DEV_BRANCH, squash=True)
@@ -81,6 +87,7 @@ def release(
         message=f"v{version}",
         description=description,
         tag=LIB_NAME,
+        ai=ai,
     )
     git.tag(dir, f"v{version}", message=f"v{version}")
     _bump_version_dev(dir, next_release)

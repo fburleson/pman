@@ -1,8 +1,31 @@
 from collections.abc import Iterable
 from pathlib import Path
 
+from pman import LIB_NAME
 from pman.core import Command
 from pman.core.util import ConventionalType
+
+_AI_DESCRIPTION_PROMPT = (
+    "Write a concise description of the staged git changes for a commit. You can use bullet points. "
+    "Return only the description, without a heading or commentary."
+)
+
+
+def _generate_ai_description(dir: Path) -> str:
+    diff = Command(("git", "diff", "--cached")).exec(dir, verbose=False)
+    result = Command(
+        (
+            "pi",
+            "--no-session",
+            "--no-tools",
+            "--print",
+            _AI_DESCRIPTION_PROMPT,
+        )
+    ).exec(dir, verbose=False, input=str(diff.stdout))
+    description = str(result.stdout).strip()
+    if not description:
+        raise Command.Error(1, "Pi returned an empty description")
+    return description
 
 
 def checkout(dir: Path, branch: str):
@@ -65,11 +88,16 @@ def commit(
     message: str,
     description: str | None = None,
     tag: str | None = None,
+    ai: bool = False,
 ):
-    # TODO(fburleson): add additional ai generated descriptions
     _tag: str = "" if tag is None else f"({tag})"
     cmd = ["git", "commit", "-m", f"{type}{_tag}: {message}"]
     if description is not None:
         for line in description.split("\n"):
+            cmd.extend(["-m", line])
+    if ai:
+        ai_description = _generate_ai_description(dir)
+        cmd.extend(["-m", f"AI description by {LIB_NAME}:"])
+        for line in ai_description.split("\n"):
             cmd.extend(["-m", line])
     return Command(cmd).exec(dir)

@@ -67,6 +67,7 @@ def todev(
     description: Annotated[
         str | None, typer.Option(help="Additional commit description")
     ] = None,
+    ai: Annotated[bool, typer.Option(help="Generate an AI commit description")] = False,
     tag: Annotated[
         str | None, typer.Option(help="Conventional commit tag, e.g. scope")
     ] = None,
@@ -85,6 +86,7 @@ def todev(
         description=description,
         tag=tag,
         delete=delete,
+        ai=ai,
     )
 
 
@@ -94,13 +96,14 @@ def release(
     description: Annotated[
         str | None, typer.Option(help="Additional commit description")
     ] = None,
+    ai: Annotated[bool, typer.Option(help="Generate an AI commit description")] = False,
     next_release: Annotated[
         SemVer,
         typer.Option(help="Semver bump of the dev branch after the release"),
     ] = SemVer.PATCH,
 ):
     """Merge dev into main and cut a release."""
-    core_release(dir, description=description, next_release=next_release)
+    core_release(dir, description=description, ai=ai, next_release=next_release)
 
 
 @cli.command()

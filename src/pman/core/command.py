@@ -36,11 +36,18 @@ class Command:
     def __rich__(self):
         return f"[bold]{LIB_NAME}[/]>\t" + "\t".join(self._commands)
 
-    def exec_raw(self, dir: Path | None = None) -> subprocess.CompletedProcess[str]:
+    def exec_raw(
+        self,
+        dir: Path | None = None,
+        *,
+        input: str | None = None,
+        verbose: bool = True,
+    ) -> subprocess.CompletedProcess[str]:
         _dir: Path = Path.cwd() if dir is None else dir
-        with Status(str(self.__rich__()), spinner="clock"):
+        with Status(str(self.__rich__()) if verbose else "", spinner="clock"):
             return subprocess.run(
                 self._commands,
+                input=input,
                 text=True,
                 shell=True,
                 check=False,
@@ -85,8 +92,14 @@ class Command:
                 out.add(f"[dim][red]{result.stderr.strip()}\n[/]")
         print(out)
 
-    def exec(self, dir: Path | None = None, *, verbose: bool = True):
-        result = self.exec_raw(dir)
+    def exec(
+        self,
+        dir: Path | None = None,
+        *,
+        verbose: bool = True,
+        input: str | None = None,
+    ):
+        result = self.exec_raw(dir, input=input, verbose=verbose)
         if verbose:
             self._print_info(result)
         if result.returncode != 0:
