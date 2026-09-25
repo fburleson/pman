@@ -125,10 +125,10 @@ def deploy(
 
 @cli.command()
 def todo(
-    dir: Annotated[Path, typer.Option(help="Directory of the project")] = Path("."),
+    dir: Annotated[Path, typer.Option(help="Directory of the project")] = Path("./src"),
 ):
     """List TODOs and FIXMEs found in the source tree."""
-    core_todo(dir)
+    core_todo(dir.resolve())
 
 
 if __name__ == "__main__":
