@@ -101,6 +101,7 @@ def release(
     git.merge(dir, DEV_BRANCH, squash=True)
     uv.version_bump(dir, [SemVer.STABLE])
     version = uv.version(dir, short=True)
+    git.add(dir)
     git.commit(
         dir,
         ConventionalType.CHORE,

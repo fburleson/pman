@@ -33,6 +33,9 @@ class TestProject:
         if self.path.exists():
             _rmtree_force(self.path)
         self.path.mkdir(parents=True)
+        subprocess.run(
+            ("gh", "repo", "delete", f"fburleson/{self.name}", "--yes"), check=False
+        )
 
     def open_vscode(self):
         subprocess.run(["code", self.path], check=True, shell=True)

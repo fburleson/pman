@@ -44,7 +44,7 @@ class Command:
         verbose: bool = True,
     ) -> subprocess.CompletedProcess[str]:
         _dir: Path = Path.cwd() if dir is None else dir
-        with Status(str(self.__rich__()) if verbose else "", spinner="clock"):
+        with Status(str(self.__rich__()) if verbose else "", spinner="dots"):
             return subprocess.run(
                 self._commands,
                 input=input,
@@ -81,7 +81,7 @@ class Command:
     def _print_info(self, result: subprocess.CompletedProcess[str]):
         if result.returncode == 0:
             out = Tree(
-                "[green]:heavy_check_mark:   [/green]" + str(self.__rich__()),
+                "[green]✓ [/green]" + str(self.__rich__()),
                 highlight=True,
             )
             if result.stdout is not None and result.stdout.strip():
