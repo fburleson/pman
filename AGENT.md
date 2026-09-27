@@ -1,0 +1,36 @@
+# AGENT.md
+
+## Toolchain
+
+- **Package manager:** `uv` (not pip). Install deps: `uv sync`.
+- **Python:** See `.python-version`
+- **External requirements:** `git`
+
+## Commands
+
+Run everything via `uv run`**pman** is a CLI that automates the lifecycle of a Python project using `uv`, `git` and `pi` agent CLI.
+
+| Task | Command |
+| --- | --- |
+| Install deps | `uv sync` |
+| Tests | `uv run pytest` |
+| Lint (auto-fix) | `uv run ruff check --fix` |
+| Format | `uv run ruff format` (ruff is the formatter) |
+| Type check | `uv run pyright` |
+| Lock validation | `uv lock --check` |
+| Build | `uv build` |
+
+`pre-commit` (`.pre-commit-config.yaml`) runs conventional commit checking (`commit-msg`), `uv lock --check`, ruff (check + format), pyright, and pytest on every commit.
+
+## Layout
+
+
+PEP 517 `src/` layout — code lives in `src/pman/`, not the package root.
+
+
+## Conventions
+
+- **Commits:** Conventional Commits (`feat`, `fix`, `chore`, ...), enforced by a pre-commit `commit-msg` hook.
+- **Quality:** ruff (lint + format), pyright (type checking), and pytest (tests) run on every commit via pre-commit.
+- **Branches:** long-lived `main` (releases) and `dev` (integration) branches; feature work goes on conventional branches.
+- **Versioning:** managed via `uv version`; keep `main` and `dev` in sync.
