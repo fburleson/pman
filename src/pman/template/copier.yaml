@@ -1,0 +1,23 @@
+_tasks:
+  - python -c "from pathlib import Path; Path('__init__.py').unlink(missing_ok=True)"
+
+  - command:
+      - python
+      - -c
+      - |
+        from pathlib import Path
+
+        path = Path("pyproject.toml")
+        if not path.exists():
+            raise SystemExit(0)
+
+        text = path.read_text(encoding="utf-8")
+        if "[tool.ruff.lint]" in text:
+            raise SystemExit(0)
+
+        config = (
+            "[tool.ruff.lint]\n"
+            'extend-select = ["TD"]\n'
+            'ignore = ["TD003"]\n'
+        )
+        path.write_text(f"{text.rstrip()}\n\n{config}", encoding="utf-8")
