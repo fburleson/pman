@@ -1,2 +1,1 @@
-def hello() -> str:
-    return "Hello from pman!"
+LIB_NAME: str = "pman"
