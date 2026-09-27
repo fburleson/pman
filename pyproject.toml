@@ -1,6 +1,6 @@
 [project]
 name = "pman"
-version = "0.1.0.dev1"
+version = "0.1.1.dev1"
 description = "pman is a cli that automates the lifecycle of a Python project using `uv`, `git`, `gh-cli`, `github` and `pi` agent cli."
 readme = "README.md"
 authors = [
